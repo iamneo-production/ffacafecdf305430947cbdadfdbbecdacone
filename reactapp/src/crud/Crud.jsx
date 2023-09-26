@@ -39,7 +39,7 @@ const productsData = [
   },
 ];
 
-function App() {
+function Crud() {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [cart, setCart] = useState([]);
 
@@ -108,4 +108,4 @@ function App() {
   );
 }
 
-export default App;
+export default Crud;
