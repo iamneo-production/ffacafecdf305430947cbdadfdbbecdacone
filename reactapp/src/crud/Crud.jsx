@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import "./Product.css";
+import "./Crud.css";
 
 const productsData = [
   {
@@ -39,7 +39,7 @@ const productsData = [
   },
 ];
 
-function Crud() {
+function App() {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [cart, setCart] = useState([]);
 
@@ -108,4 +108,4 @@ function Crud() {
   );
 }
 
-export default Crud;
+export default App;
