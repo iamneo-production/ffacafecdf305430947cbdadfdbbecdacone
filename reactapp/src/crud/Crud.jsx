@@ -1,109 +1,130 @@
 import React, { useState } from "react";
 import "./Crud.css";
 
-const productsData = [
-  {
-    id: 1,
-    name: "Product 1",
-    description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-    price: 19.99,
-    image: require("./product1.jpg"),
-  },
-  {
-    id: 2,
-    name: "Product 2",
-    description: "Vestibulum id ligula porta felis euismod semper.",
-    price: 29.99,
-    image: require("./product2.webp"),
-  },
-  {
-    id: 3,
-    name: "Product 3",
-    description: "Nullam quis risus eget urna mollis ornare vel eu leo.",
-    price: 14.99,
-    image: require("./product4.jpg"),
-  },
-  {
-    id: 4,
-    name: "Product 4",
-    description: "Cras mattis consectetur purus sit amet fermentum.",
-    price: 24.99,
-    image: require("./product4.jpg"),
-  },
-  {
-    id: 5,
-    name: "Product 5",
-    description: "Aenean lacinia bibendum nulla sed consectetur.",
-    price: 9.99,
-    image: require("./product1.jpg"),
-  },
-];
-
 function Crud() {
-  const [selectedProduct, setSelectedProduct] = useState(null);
-  const [cart, setCart] = useState([]);
+  const [products, setProducts] = useState([]);
+  const [currentProduct, setCurrentProduct] = useState({
+    name: "",
+    description: "",
+    quantity: "",
+    price: "",
+  });
+  const [editingIndex, setEditingIndex] = useState(null);
+  const [inputError, setInputError] = useState(false);
 
-  const getTotalAmount = () => {
-    return cart.reduce((total, product) => total + product.price, 0).toFixed(2);
-  };
-
-  const handleProductSelect = (product) => {
-    setSelectedProduct(product);
-  };
-
-  const handleAddToCart = () => {
-    if (selectedProduct) {
-      const updatedCart = [...cart, selectedProduct];
-      setCart(updatedCart);
-      setSelectedProduct(null);
+  const handleAddProduct = () => {
+    if (
+      currentProduct.name.trim() !== "" &&
+      currentProduct.description.trim() !== "" &&
+      currentProduct.quantity.trim() !== "" &&
+      currentProduct.price.trim() !== ""
+    ) {
+      if (editingIndex !== null) {
+        // Update existing product
+        const updatedProducts = [...products];
+        updatedProducts[editingIndex] = currentProduct;
+        setProducts(updatedProducts);
+        setEditingIndex(null);
+      } else {
+        // Add new product
+        setProducts([...products, currentProduct]);
+      }
+      setCurrentProduct({
+        name: "",
+        description: "",
+        quantity: "",
+        price: "",
+      });
+      setInputError(false);
+    } else {
+      setInputError(true);
     }
   };
 
+  const handleEditProduct = (index) => {
+    setCurrentProduct(products[index]);
+    setEditingIndex(index);
+  };
+
+  const handleDeleteProduct = (index) => {
+    const updatedProducts = products.filter((_, i) => i !== index);
+    setProducts(updatedProducts);
+  };
+
   return (
-    <div className="app">
-      <h1>ShopAura</h1>
-      <div className="product-list">
-        {productsData.map((product) => (
-          <div
-            key={product.id}
-            className={`product ${
-              selectedProduct === product ? "selected" : ""
-            }`}
-            onClick={() => handleProductSelect(product)}
-          >
-            <img src={product.image} alt={product.name} />
-            <h3>{product.name}</h3>
-            <p>{product.description}</p>
-            <p>${product.price.toFixed(2)}</p>
-          </div>
-        ))}
-      </div>
-      {selectedProduct && (
-        <div className="product-details">
-          <img src={selectedProduct.image} alt={selectedProduct.name} />
-          <h2>{selectedProduct.name}</h2>
-          <p>{selectedProduct.description}</p>
-          <p>${selectedProduct.price.toFixed(2)}</p>
-          <button onClick={handleAddToCart}>Add to Cart</button>
-        </div>
-      )}
-      <div className="cart">
-        <h2>Cart</h2>
-        {cart.length === 0 ? (
-          <p>Your cart is empty.</p>
-        ) : (
-          <div>
-            <ul>
-              {cart.map((product) => (
-                <li key={product.id}>
-                  {product.name} - ${product.price.toFixed(2)}
-                </li>
-              ))}
-            </ul>
-            <p>Total Amount: ${getTotalAmount()}</p>
-          </div>
+    <div className="app-container">
+      <h1>Product Details</h1>
+      <div className="input-container">
+        {/* Input fields */}
+        <input
+          type="text"
+          placeholder="Product Name"
+          value={currentProduct.name}
+          onChange={(e) =>
+            setCurrentProduct({ ...currentProduct, name: e.target.value })
+          }
+        />
+        <input
+          type="text"
+          placeholder="Product Description"
+          value={currentProduct.description}
+          onChange={(e) =>
+            setCurrentProduct({
+              ...currentProduct,
+              description: e.target.value,
+            })
+          }
+        />
+        <input
+          type="number"
+          placeholder="Quantity"
+          value={currentProduct.quantity}
+          onChange={(e) =>
+            setCurrentProduct({ ...currentProduct, quantity: e.target.value })
+          }
+        />
+        <input
+          type="number"
+          placeholder="Price"
+          value={currentProduct.price}
+          onChange={(e) =>
+            setCurrentProduct({ ...currentProduct, price: e.target.value })
+          }
+        />
+        {inputError && (
+          <p className="error-message">All fields are required.</p>
         )}
+        <button onClick={handleAddProduct}>
+          {editingIndex !== null ? "Update" : "Add"}
+        </button>
       </div>
+      <table className="product-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Quantity</th>
+            <th>Price</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {products.map((product, index) => (
+            <tr key={index}>
+              <td>{product.name}</td>
+              <td>{product.description}</td>
+              <td>{product.quantity}</td>
+              <td>{product.price}</td>
+              <td>
+                <button onClick={() => handleEditProduct(index)}>Edit</button>
+                <button onClick={() => handleDeleteProduct(index)}>
+                  Delete
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }
